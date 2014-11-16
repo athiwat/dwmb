@@ -3,8 +3,10 @@ package com.thoughtworks;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
 
-public class HelloAndroidActivity extends Activity {
+public class DWMBActivity extends Activity {
 
     /**
      * Called when the activity is first created.
@@ -12,11 +14,23 @@ public class HelloAndroidActivity extends Activity {
      * previously being shut down then this Bundle contains the data it most 
      * recently supplied in onSaveInstanceState(Bundle). <b>Note: Otherwise it is null.</b>
      */
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final TextView textView = (TextView) findViewById(R.id.textview);
+        View button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView.setText(R.string.app_name);
+            }
+        });
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
