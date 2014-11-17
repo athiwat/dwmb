@@ -1,12 +1,9 @@
 package com.thoughtworks;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Xml;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -18,30 +15,31 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StationListActivity extends Activity {
+public class TimeEstimationActivity extends Activity {
 
-    private static final String URL_GET_STATION = "http://api.bart.gov/api/stn.aspx?cmd=stns&key=MW9S-E7SL-26DU-VV8V";
-    public static final String CURRENT_STATION = "CurrentStation";
+    private static final String URL_GET_TIME_ESTIMATION = "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=%s&key=MW9S-E7SL-26DU-VV8V";
+    private String currentStation;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.station_list);
+        currentStation = getIntent().getStringExtra(StationListActivity.CURRENT_STATION);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        DownloadStationTask downloadStationTask = new DownloadStationTask();
-        downloadStationTask.execute();
-
+        new GetTimeEstimationTask().execute();
     }
 
-    class DownloadStationTask extends AsyncTask {
+
+
+    class GetTimeEstimationTask extends AsyncTask {
         @Override
         protected Map<String, String> doInBackground(Object[] objects) {
             try {
-                return getStations(URL_GET_STATION);
+                return getStations(String.format(URL_GET_TIME_ESTIMATION, currentStation));
             } catch (IOException e) {
                 return new HashMap<String, String>();
             }
@@ -84,25 +82,7 @@ public class StationListActivity extends Activity {
                 }
                 String name = parser.getName();
                 // Starts by looking for the entry tag
-                if (name.equals("stations")) {
-                    map.putAll(readStations(parser));
-                } else {
-                    skip(parser);
-                }
-            }
-            return map;
-        }
-
-        private Map<String, String> readStations(XmlPullParser parser) throws IOException, XmlPullParserException {
-            Map<String, String> map = new HashMap<String, String>();
-            parser.require(XmlPullParser.START_TAG, null, "stations");
-            while (parser.next() != XmlPullParser.END_TAG) {
-                if (parser.getEventType() != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                String name = parser.getName();
-                // Starts by looking for the entry tag
-                if (name.equals("station")) {
+                if ("station".equals(name)) {
                     map.putAll(readStation(parser));
                 } else {
                     skip(parser);
@@ -114,24 +94,61 @@ public class StationListActivity extends Activity {
         private Map<String, String> readStation(XmlPullParser parser) throws IOException, XmlPullParserException {
             Map<String, String> map = new HashMap<String, String>();
             parser.require(XmlPullParser.START_TAG, null, "station");
-            String stationName = "";
-            String stationAbbr = "";
             while (parser.next() != XmlPullParser.END_TAG) {
                 if (parser.getEventType() != XmlPullParser.START_TAG) {
                     continue;
                 }
                 String name = parser.getName();
-                if ("name".equalsIgnoreCase(name)) {
-                    stationName = readName(parser, "name");
-                } else if ("abbr".equalsIgnoreCase(name)) {
-                    stationAbbr = readName(parser, "abbr");
+                // Starts by looking for the entry tag
+                if ("etd".equals(name)) {
+                    map.putAll(readETD(parser));
+                } else {
+                    skip(parser);
+                }
+            }
+            return map;
+        }
+
+        private Map<String, String> readETD(XmlPullParser parser) throws IOException, XmlPullParserException {
+            Map<String, String> map = new HashMap<String, String>();
+            parser.require(XmlPullParser.START_TAG, null, "etd");
+            String destination = "";
+            String estimate = "";
+            while (parser.next() != XmlPullParser.END_TAG) {
+                if (parser.getEventType() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                String name = parser.getName();
+                if ("destination".equalsIgnoreCase(name)) {
+                    destination = readName(parser, "destination");
+                } else if ("estimate".equalsIgnoreCase(name)) {
+                    estimate = readEstimate(parser);
                 } else {
                     skip(parser);
                 }
 
             }
-            map.put(stationAbbr, stationName);
-            return map;
+            map.put(destination, estimate);
+            return  map;
+        }
+
+
+        private String readEstimate(XmlPullParser parser) throws IOException, XmlPullParserException {
+            parser.require(XmlPullParser.START_TAG, null, "estimate");
+            String minutes = "";
+            while (parser.next() != XmlPullParser.END_TAG) {
+                if (parser.getEventType() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                String name = parser.getName();
+                if ("minutes".equalsIgnoreCase(name)) {
+                    minutes = readName(parser, "minutes");
+                } else {
+                    skip(parser);
+                }
+
+            }
+            return minutes;
         }
 
         private String readName(XmlPullParser parser, String tag) throws IOException, XmlPullParserException {
@@ -168,21 +185,12 @@ public class StationListActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(Object stations) {
-            super.onPostExecute(stations);
-            ListView stationList = (ListView) findViewById(R.id.station_list);
-            StationListAdapter adapter = new StationListAdapter(StationListActivity.this, (Map<String, String>) stations);
-            stationList.setAdapter(adapter);
-            stationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                    String abbr = (String) view.getTag();
-                    Intent myIntent = new Intent(StationListActivity.this, TimeEstimationActivity.class);
-                    myIntent.putExtra(CURRENT_STATION, abbr);
-                    startActivity(myIntent);
-                }
-            });
-        }
+        protected void onPostExecute(Object estimates) {
+            super.onPostExecute(estimates);
 
+            ListView stationList = (ListView) findViewById(R.id.station_list);
+            TimeEstimationAdapter adapter = new TimeEstimationAdapter(TimeEstimationActivity.this, (Map<String, String>) estimates);
+            stationList.setAdapter(adapter);
+        }
     }
 }

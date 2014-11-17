@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".StationListActivity"/>
-        <activity android:name=".TimeActivity"/>
+        <activity android:name=".TimeEstimationActivity"/>
     </application>
 
 </manifest>

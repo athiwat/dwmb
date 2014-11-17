@@ -10,15 +10,16 @@ import android.widget.TextView;
 
 import java.util.Map;
 
-public class StationListAdapter extends BaseAdapter {
-    private final String[] abbrs;
-    private Context context;
-    private Map<String, String> data;
+public class TimeEstimationAdapter extends BaseAdapter {
 
-    public StationListAdapter(Context context, Map<String, String> data) {
+    private final Context context;
+    private final Map<String, String> data;
+    private final String[] stations;
+
+    public TimeEstimationAdapter(Context context, Map<String, String> data) {
         this.context = context;
         this.data = data;
-        abbrs = data.keySet().toArray(new String[data.size()]);
+        stations = data.keySet().toArray(new String[data.size()]);
 
 
     }
@@ -30,12 +31,12 @@ public class StationListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return data.get(abbrs[position]);
+        return data.get(stations[position]);
     }
 
     @Override
-    public long getItemId(int id) {
-        return id;
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -46,13 +47,11 @@ public class StationListAdapter extends BaseAdapter {
         }
 
         TextView nameTextView = (TextView) view.findViewById(android.R.id.text1);
-        nameTextView.setText((String) getItem(position));
+        nameTextView.setText(stations[position]);
 
-        String abbr = abbrs[position];
         TextView abbrTextView= (TextView) view.findViewById(android.R.id.text2);
-        abbrTextView.setText(abbr);
+        abbrTextView.setText(getItem(position).toString() + " minutes");
 
-        view.setTag(abbr);
         return view;
     }
 }
