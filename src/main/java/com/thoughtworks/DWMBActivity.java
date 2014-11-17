@@ -1,6 +1,7 @@
 package com.thoughtworks;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -26,6 +27,15 @@ public class DWMBActivity extends Activity {
             @Override
             public void onClick(View v) {
                 textView.setText(R.string.app_name);
+            }
+        });
+
+        View showStationsButton = findViewById(R.id.button_show_stations);
+        showStationsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent newIntent = new Intent(DWMBActivity.this, StationListActivity.class);
+                startActivity(newIntent);
             }
         });
     }
