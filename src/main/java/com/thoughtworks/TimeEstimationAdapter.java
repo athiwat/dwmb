@@ -8,30 +8,27 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.List;
 import java.util.Map;
 
 public class TimeEstimationAdapter extends BaseAdapter {
 
     private final Context context;
-    private final Map<String, String> data;
-    private final String[] stations;
+    private List<Map<String, String>> estimates;
 
-    public TimeEstimationAdapter(Context context, Map<String, String> data) {
+    public TimeEstimationAdapter(Context context, List<Map<String, String>> estimates) {
         this.context = context;
-        this.data = data;
-        stations = data.keySet().toArray(new String[data.size()]);
-
-
+        this.estimates = estimates;
     }
 
     @Override
     public int getCount() {
-        return data.size();
+        return estimates.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return data.get(stations[position]);
+    public Map<String,String> getItem(int position) {
+        return estimates.get(position);
     }
 
     @Override
@@ -47,10 +44,10 @@ public class TimeEstimationAdapter extends BaseAdapter {
         }
 
         TextView nameTextView = (TextView) view.findViewById(android.R.id.text1);
-        nameTextView.setText(stations[position]);
+        nameTextView.setText(getItem(position).keySet().toArray()[0].toString());
 
         TextView abbrTextView= (TextView) view.findViewById(android.R.id.text2);
-        abbrTextView.setText(getItem(position).toString() + " minutes");
+        abbrTextView.setText(getItem(position).values().toArray()[0] + " minutes");
 
         return view;
     }

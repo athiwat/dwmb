@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.Toast;
 
 public class DWMBActivity extends Activity {
 
@@ -21,16 +21,15 @@ public class DWMBActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final TextView textView = (TextView) findViewById(R.id.textview);
-        View button = findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
+        View button_nearest_station = findViewById(R.id.button_nearest_station);
+        button_nearest_station.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textView.setText(R.string.app_name);
+                Toast.makeText(DWMBActivity.this, "Implement geo location here", Toast.LENGTH_LONG).show();
             }
         });
 
-        View showStationsButton = findViewById(R.id.button_show_stations);
+        View showStationsButton = findViewById(R.id.button_choose_a_station);
         showStationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -40,11 +39,8 @@ public class DWMBActivity extends Activity {
         });
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-	// Inflate the menu; this adds items to the action bar if it is present.
 	getMenuInflater().inflate(com.thoughtworks.R.menu.main, menu);
 	return true;
     }
